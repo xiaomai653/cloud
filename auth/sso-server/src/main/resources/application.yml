@@ -1,0 +1,9 @@
+server:
+  port: 8085
+spring:
+  application:
+    name: auth-sso-server
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848

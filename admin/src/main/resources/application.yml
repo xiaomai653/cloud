@@ -1,0 +1,23 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: admin
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+  security:
+    user:
+      name: admin
+      password: 123456
+management:
+  # 暴露监控端点web端
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  # 显示服务健康具体信息
+  endpoint:
+    health:
+      show-details: always

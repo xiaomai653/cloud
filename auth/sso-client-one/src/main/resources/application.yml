@@ -1,0 +1,27 @@
+server:
+  port: 8086
+  # 防止Cookie冲突，冲突会导致登录验证不通过,两种方式都可以避免
+  servlet:
+#    context-path: /client1
+    session:
+      cookie:
+        name: AUTH-SSO-CLIENT1-SESSIONID
+spring:
+  application:
+    name: auth-sso-client1
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+security:
+  oauth2:
+    client:
+      # 客户端身份标识
+      client-id: client1
+      # 客户端密钥
+      client-secret: client1_123456
+      user-authorization-uri: http://localhost:8085/oauth/authorize
+      access-token-uri: http://localhost:8085/oauth/token
+    resource:
+      jwt:
+        key-uri: http://localhost:8085/oauth/token_key

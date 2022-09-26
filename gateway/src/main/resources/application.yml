@@ -1,0 +1,54 @@
+server:
+  port: 8084
+spring:
+  application:
+    name: gateway
+  redis:  #当需要用到redis令牌桶限流的时候开启
+    host: localhost
+    port: 6379
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+    gateway:
+      # 全局过滤
+      default-filters:
+        # 限流过滤
+        - name: RequestRateLimiter
+          args:
+            # 每秒处理多少个平均请求数（一秒填充速率）
+            redis-rate-limiter.replenishRate: 10
+            # 一秒钟内执行的最大请求数（总容量）
+            redis-rate-limiter.burstCapacity: 20
+            # 每个请求从存储桶中获取的令牌数
+            redis-rate-limiter.requestedTokens: 1
+            # 使用SpEL表达式从Spring容器中获取Bean对象
+            key-resolver: "#{@apiKeyResolver}"
+      # 路由规则
+      routes:
+        # 路由标识，要求唯一，名称任意
+        - id: consumer
+          # 请求最终被转发到的目标地址
+          uri: lb://consumer
+          # 断言，满足 /gateway/consumer/** 路径的请求都会被路由到 lb://consumer 这个uri中
+          predicates:
+            - Path=/consumer/**
+          # 配置过滤器（局部）
+          filters:
+            - AddResponseHeader=X-Response-Foo, Bar
+            # 内置过滤器，写法等同于
+#             - name: AddResponseHeader
+#               args:
+#                name: X-Response-Foo
+#                value: Bar
+            - StripPrefix=1
+            # StripPrefix：去除原始请求路径中的前1级路径，即/gateway
+        - id: provider
+          uri: lb://provider
+          predicates:
+            - Path=/provider/**
+          filters:
+            - AddResponseHeader=X-Response-Foo, Bar
+            - StripPrefix=1
+            # TokenGatewayFilterFactory 这个过滤器
+            - Token
